@@ -161,8 +161,8 @@ const RandomWalkSimulation = () => {
               }}
             >
               <option value={0}>Constant</option>
-              <option value={2}>X</option>
-              <option value={3}>Y</option>
+              <option value={2}>Y</option>
+              <option value={3}>X</option>
             </select>
           </div>
           <div>

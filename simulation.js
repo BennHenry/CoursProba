@@ -1,7 +1,4 @@
-const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
-
 const RandomWalkSimulation = () => {
-  const [simData, setSimData] = React.useState([]);
   const [params, setParams] = React.useState({
     opt: 1,
     N: 1000,
@@ -10,6 +7,8 @@ const RandomWalkSimulation = () => {
   const [animationSpeed, setAnimationSpeed] = React.useState(50);
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [currentStep, setCurrentStep] = React.useState(0);
+  const chartRef = React.useRef(null);
+  const chartInstance = React.useRef(null);
 
   const zeta = (s) => {
     let sum = 0;
@@ -54,7 +53,9 @@ const RandomWalkSimulation = () => {
 
   const generateTrajectory = () => {
     let totCas = 0;
-    const traj = [{ step: 0, value: 0, expected: 0 }];
+    const values = [0];
+    const expected = [0];
+    const steps = Array.from({length: params.N + 1}, (_, i) => i);
     
     const a = params.opt === 1 ? 5/2 :
              params.opt === 0 ? 1 :
@@ -62,20 +63,53 @@ const RandomWalkSimulation = () => {
 
     for (let i = 1; i <= params.N; i++) {
       totCas += sim(params.opt);
-      traj.push({
-        step: i,
-        value: totCas,
-        expected: a * i
-      });
+      values.push(totCas);
+      expected.push(a * i);
     }
-    return traj;
+    
+    return { steps, values, expected };
   };
 
   React.useEffect(() => {
-    const fullData = generateTrajectory();
-    setSimData(fullData);
-    setCurrentStep(0);
-  }, [params]);
+    if (chartRef.current) {
+      if (chartInstance.current) {
+        chartInstance.current.destroy();
+      }
+
+      const ctx = chartRef.current.getContext('2d');
+      const { steps, values, expected } = generateTrajectory();
+
+      chartInstance.current = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: steps,
+          datasets: [
+            {
+              label: 'Random Walk',
+              data: values.slice(0, currentStep + 1),
+              borderColor: 'rgb(75, 192, 192)',
+              tension: 0.1
+            },
+            {
+              label: 'Expected Value',
+              data: expected.slice(0, currentStep + 1),
+              borderColor: 'rgb(255, 99, 132)',
+              tension: 0.1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          animation: false,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+  }, [params, currentStep]);
 
   React.useEffect(() => {
     let interval;
@@ -87,8 +121,6 @@ const RandomWalkSimulation = () => {
     return () => clearInterval(interval);
   }, [isPlaying, currentStep, params.N, animationSpeed]);
 
-  const displayData = simData.slice(0, currentStep + 1);
-
   return (
     <div className="p-4 space-y-4">
       <div className="space-y-2">
@@ -98,7 +130,10 @@ const RandomWalkSimulation = () => {
             <select 
               className="mt-1 block w-full rounded border shadow-sm"
               value={params.opt}
-              onChange={(e) => setParams(prev => ({ ...prev, opt: parseInt(e.target.value) }))}
+              onChange={(e) => {
+                setParams(prev => ({ ...prev, opt: parseInt(e.target.value) }));
+                setCurrentStep(0);
+              }}
             >
               <option value={0}>Constant</option>
               <option value={1}>Binary</option>
@@ -112,7 +147,10 @@ const RandomWalkSimulation = () => {
               type="number"
               className="mt-1 block w-full rounded border shadow-sm"
               value={params.N}
-              onChange={(e) => setParams(prev => ({ ...prev, N: parseInt(e.target.value) }))}
+              onChange={(e) => {
+                setParams(prev => ({ ...prev, N: parseInt(e.target.value) }));
+                setCurrentStep(0);
+              }}
             />
           </div>
           <div>
@@ -145,29 +183,7 @@ const RandomWalkSimulation = () => {
       </div>
       
       <div className="h-96">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={displayData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="step" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Line 
-              type="monotone" 
-              dataKey="value" 
-              stroke="#8884d8" 
-              name="Random Walk"
-              dot={false}
-            />
-            <Line 
-              type="monotone" 
-              dataKey="expected" 
-              stroke="#82ca9d" 
-              name="Expected Value"
-              dot={false}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        <canvas ref={chartRef}></canvas>
       </div>
     </div>
   );

@@ -2,7 +2,6 @@ const RandomWalkSimulation = () => {
   const [params, setParams] = React.useState({
     opt: 1,
     N: 1000,
-    opt2: 0
   });
   const [animationSpeed, setAnimationSpeed] = React.useState(50);
   const [isPlaying, setIsPlaying] = React.useState(false);
@@ -51,7 +50,7 @@ const RandomWalkSimulation = () => {
     }
   };
 
-  const generateTrajectory = () => {
+  const generateTrajectory = React.useCallback(() => {
     let totCas = 0;
     const values = [0];
     const expected = [0];
@@ -68,48 +67,60 @@ const RandomWalkSimulation = () => {
     }
     
     return { steps, values, expected };
-  };
+  }, [params.N, params.opt]);
 
-  React.useEffect(() => {
+  const updateChart = React.useCallback(() => {
     if (chartRef.current) {
+      const ctx = chartRef.current.getContext('2d');
+      const { steps, values, expected } = generateTrajectory();
+
       if (chartInstance.current) {
         chartInstance.current.destroy();
       }
 
-      const ctx = chartRef.current.getContext('2d');
-      const { steps, values, expected } = generateTrajectory();
-
       chartInstance.current = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: steps,
+          labels: steps.slice(0, currentStep + 1),
           datasets: [
             {
               label: 'Random Walk',
               data: values.slice(0, currentStep + 1),
               borderColor: 'rgb(75, 192, 192)',
-              tension: 0.1
+              borderWidth: 2,
+              pointRadius: 0
             },
             {
               label: 'Expected Value',
               data: expected.slice(0, currentStep + 1),
               borderColor: 'rgb(255, 99, 132)',
-              tension: 0.1
+              borderWidth: 2,
+              pointRadius: 0
             }
           ]
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           animation: false,
           scales: {
             y: {
-              beginAtZero: true
+              beginAtZero: false
+            }
+          },
+          plugins: {
+            legend: {
+              position: 'top'
             }
           }
         }
       });
     }
-  }, [params, currentStep]);
+  }, [generateTrajectory, currentStep]);
+
+  React.useEffect(() => {
+    updateChart();
+  }, [updateChart]);
 
   React.useEffect(() => {
     let interval;
@@ -122,17 +133,19 @@ const RandomWalkSimulation = () => {
   }, [isPlaying, currentStep, params.N, animationSpeed]);
 
   return (
-    <div className="p-4 space-y-4">
-      <div className="space-y-2">
-        <div className="flex space-x-4">
+    <div className="p-4 max-w-6xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Random Walk Simulation</h1>
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium">Simulation Type:</label>
+            <label className="block text-sm font-medium mb-1">Simulation Type:</label>
             <select 
-              className="mt-1 block w-full rounded border shadow-sm"
+              className="w-full rounded border shadow-sm p-2"
               value={params.opt}
               onChange={(e) => {
                 setParams(prev => ({ ...prev, opt: parseInt(e.target.value) }));
                 setCurrentStep(0);
+                setIsPlaying(false);
               }}
             >
               <option value={0}>Constant</option>
@@ -142,24 +155,27 @@ const RandomWalkSimulation = () => {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium">Steps (N):</label>
+            <label className="block text-sm font-medium mb-1">Steps (N):</label>
             <input
               type="number"
-              className="mt-1 block w-full rounded border shadow-sm"
+              className="w-full rounded border shadow-sm p-2"
               value={params.N}
               onChange={(e) => {
-                setParams(prev => ({ ...prev, N: parseInt(e.target.value) }));
+                setParams(prev => ({ ...prev, N: Math.max(1, parseInt(e.target.value) || 0) }));
                 setCurrentStep(0);
+                setIsPlaying(false);
               }}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium">Animation Speed (ms):</label>
+            <label className="block text-sm font-medium mb-1">Animation Speed (ms):</label>
             <input
               type="number"
-              className="mt-1 block w-full rounded border shadow-sm"
+              className="w-full rounded border shadow-sm p-2"
               value={animationSpeed}
-              onChange={(e) => setAnimationSpeed(parseInt(e.target.value))}
+              min="1"
+              max="1000"
+              onChange={(e) => setAnimationSpeed(Math.max(1, parseInt(e.target.value) || 50))}
             />
           </div>
         </div>
@@ -180,10 +196,9 @@ const RandomWalkSimulation = () => {
             Reset
           </button>
         </div>
-      </div>
-      
-      <div className="h-96">
-        <canvas ref={chartRef}></canvas>
+        <div className="h-96 border rounded p-4">
+          <canvas ref={chartRef}></canvas>
+        </div>
       </div>
     </div>
   );

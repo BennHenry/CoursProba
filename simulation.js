@@ -1,3 +1,5 @@
+const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
+
 const RandomWalkSimulation = () => {
   const [simData, setSimData] = React.useState([]);
   const [params, setParams] = React.useState({
@@ -94,7 +96,7 @@ const RandomWalkSimulation = () => {
           <div>
             <label className="block text-sm font-medium">Simulation Type:</label>
             <select 
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+              className="mt-1 block w-full rounded border shadow-sm"
               value={params.opt}
               onChange={(e) => setParams(prev => ({ ...prev, opt: parseInt(e.target.value) }))}
             >
@@ -108,7 +110,7 @@ const RandomWalkSimulation = () => {
             <label className="block text-sm font-medium">Steps (N):</label>
             <input
               type="number"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+              className="mt-1 block w-full rounded border shadow-sm"
               value={params.N}
               onChange={(e) => setParams(prev => ({ ...prev, N: parseInt(e.target.value) }))}
             />
@@ -117,7 +119,7 @@ const RandomWalkSimulation = () => {
             <label className="block text-sm font-medium">Animation Speed (ms):</label>
             <input
               type="number"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+              className="mt-1 block w-full rounded border shadow-sm"
               value={animationSpeed}
               onChange={(e) => setAnimationSpeed(parseInt(e.target.value))}
             />
@@ -143,29 +145,29 @@ const RandomWalkSimulation = () => {
       </div>
       
       <div className="h-96">
-        <Recharts.ResponsiveContainer width="100%" height="100%">
-          <Recharts.LineChart data={displayData}>
-            <Recharts.CartesianGrid strokeDasharray="3 3" />
-            <Recharts.XAxis dataKey="step" />
-            <Recharts.YAxis />
-            <Recharts.Tooltip />
-            <Recharts.Legend />
-            <Recharts.Line 
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={displayData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="step" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Line 
               type="monotone" 
               dataKey="value" 
               stroke="#8884d8" 
               name="Random Walk"
               dot={false}
             />
-            <Recharts.Line 
+            <Line 
               type="monotone" 
               dataKey="expected" 
               stroke="#82ca9d" 
               name="Expected Value"
               dot={false}
             />
-          </Recharts.LineChart>
-        </Recharts.ResponsiveContainer>
+          </LineChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );

@@ -30,7 +30,7 @@ const RandomWalkSimulation = () => {
         const ct = 1 / zeta(3);
         let U = Math.random();
         let p = ct;
-        let k = 1;
+        let k = 0;
         while (U > p) {
           k = k + 1;
           p = p + ct / (Math.pow(k, 3));
@@ -41,7 +41,7 @@ const RandomWalkSimulation = () => {
         let U = Math.random();
         const ct = 6 / (Math.PI * Math.PI);
         let p = ct;
-        let k = 1;
+        let k = 0;
         while (U > p) {
           k = k + 1;
           p = p + ct / (k * k);
@@ -93,16 +93,18 @@ const RandomWalkSimulation = () => {
         labels: steps.slice(0, step + 1),
         datasets: [
           {
-            label: 'Random Walk',
+            label: 'Valeur moyenne de tirage',
             data: values.slice(0, step + 1),
             borderColor: 'rgb(75, 192, 192)',
             borderWidth: 2,
-            pointRadius: 0
+            pointRadius: 0,
+            tension : 0,
+            stepped: true
           },
           {
-            label: 'Expected Value',
+            label: 'Valeur attendue (le cas échéant)',
             data: expected.slice(0, step + 1),
-            borderColor: 'rgb(255, 255, 132)',
+            borderColor: 'rgb(255, 0, 132)',
             borderWidth: 2,
             pointRadius: 0
           }
@@ -159,9 +161,8 @@ const RandomWalkSimulation = () => {
               }}
             >
               <option value={0}>Constant</option>
-              <option value={1}>Binary</option>
-              <option value={2}>Zeta(3)</option>
-              <option value={3}>Zeta(2)</option>
+              <option value={2}>X</option>
+              <option value={3}>Y</option>
             </select>
           </div>
           <div>

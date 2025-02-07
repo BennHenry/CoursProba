@@ -29,7 +29,7 @@ const RandomWalkSimulation = () => {
       case 2: {
         const ct = 1 / zeta(3);
         let U = Math.random();
-        let p = ct;
+        let p = 0;
         let k = 0;
         while (U > p) {
           k = k + 1;
@@ -40,7 +40,7 @@ const RandomWalkSimulation = () => {
       default: {
         let U = Math.random();
         const ct = 6 / (Math.PI * Math.PI);
-        let p = ct;
+        let p = 0;
         let k = 0;
         while (U > p) {
           k = k + 1;
@@ -54,13 +54,13 @@ const RandomWalkSimulation = () => {
   const generateTrajectory = React.useCallback(() => {
     let totCas = 0;
     const values = [0];
-    const expected = [];
+    
     const steps = Array.from({length: params.N + 1}, (_, i) => i);
     
     const a = params.opt === 1 ? 5/2 :
-             params.opt === 0 ? 1 :
+             params.opt === 3 ? Math.log(2) :
              params.opt === 2 ? Math.PI * Math.PI / 12 : 1;
-
+             const expected = [a];
     for (let i = 1; i <= params.N; i++) {
       totCas += sim(params.opt);
       values.push(totCas/i);

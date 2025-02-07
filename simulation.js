@@ -1,6 +1,6 @@
 const RandomWalkSimulation = () => {
   const [params, setParams] = React.useState({
-    opt: 1,
+    opt: 0,
     N: 1000,
   });
   const [animationSpeed, setAnimationSpeed] = React.useState(50);

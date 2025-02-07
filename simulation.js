@@ -147,11 +147,11 @@ const RandomWalkSimulation = () => {
 
   return (
     <div className="p-4 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Random Walk Simulation</h1>
+      <h1 className="text-2xl font-bold mb-4">Simulation de valeur moyenne</h1>
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Simulation Type:</label>
+            <label className="block text-sm font-medium mb-1">Type de Simulation:</label>
             <select 
               className="w-full rounded border shadow-sm p-2"
               value={params.opt}

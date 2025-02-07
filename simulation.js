@@ -59,7 +59,7 @@ const RandomWalkSimulation = () => {
     
     const a = params.opt === 1 ? 5/2 :
              params.opt === 3 ? Math.log(2) :
-             params.opt === 2 ? Math.PI * Math.PI / 12 : 1;
+             params.opt === 2 ? Math.PI * Math.PI / (12 * zeta(3) ) : 1;
              const expected = [a];
     for (let i = 1; i <= params.N; i++) {
       totCas += sim(params.opt);

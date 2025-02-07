@@ -28,8 +28,8 @@ const RandomWalkSimulation = () => {
       case 2: {
         const ct = 1 / zeta(3);
         let U = Math.random();
-        let p = ct;
-        let k = 1;
+        let p = 0;
+        let k = 0;
         while (U > p) {
           k = k + 1;
           p = p + ct / (Math.pow(k, 3));
@@ -39,8 +39,8 @@ const RandomWalkSimulation = () => {
       default: {
         let U = Math.random();
         const ct = 6 / (Math.PI * Math.PI);
-        let p = ct;
-        let k = 1;
+        let p = 0;
+        let k = 0;
         while (U > p) {
           k = k + 1;
           p = p + ct / (k * k);
@@ -62,8 +62,8 @@ const RandomWalkSimulation = () => {
 
     for (let i = 1; i <= params.N; i++) {
       totCas += sim(params.opt);
-      values.push(totCas);
-      expected.push(a * i);
+      values.push(totCas/i);
+      expected.push(a);
     }
     
     return { steps, values, expected };

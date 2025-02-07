@@ -54,7 +54,7 @@ const RandomWalkSimulation = () => {
   const generateTrajectory = React.useCallback(() => {
     let totCas = 0;
     const values = [0];
-    const expected = [0];
+    const expected = [];
     const steps = Array.from({length: params.N + 1}, (_, i) => i);
     
     const a = params.opt === 1 ? 5/2 :
@@ -63,8 +63,8 @@ const RandomWalkSimulation = () => {
 
     for (let i = 1; i <= params.N; i++) {
       totCas += sim(params.opt);
-      values.push(totCas);
-      expected.push(a * i);
+      values.push(totCas/i);
+      expected.push(a);
     }
     
     return { steps, values, expected };
@@ -102,7 +102,7 @@ const RandomWalkSimulation = () => {
           {
             label: 'Expected Value',
             data: expected.slice(0, step + 1),
-            borderColor: 'rgb(255, 99, 132)',
+            borderColor: 'rgb(255, 255, 132)',
             borderWidth: 2,
             pointRadius: 0
           }

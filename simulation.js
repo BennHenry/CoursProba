@@ -8,6 +8,7 @@ const RandomWalkSimulation = () => {
   const [currentStep, setCurrentStep] = React.useState(0);
   const chartRef = React.useRef(null);
   const chartInstance = React.useRef(null);
+  const trajectoryRef = React.useRef(null);
 
   const zeta = (s) => {
     let sum = 0;
@@ -28,8 +29,8 @@ const RandomWalkSimulation = () => {
       case 2: {
         const ct = 1 / zeta(3);
         let U = Math.random();
-        let p = 0;
-        let k = 0;
+        let p = ct;
+        let k = 1;
         while (U > p) {
           k = k + 1;
           p = p + ct / (Math.pow(k, 3));
@@ -39,8 +40,8 @@ const RandomWalkSimulation = () => {
       default: {
         let U = Math.random();
         const ct = 6 / (Math.PI * Math.PI);
-        let p = 0;
-        let k = 0;
+        let p = ct;
+        let k = 1;
         while (U > p) {
           k = k + 1;
           p = p + ct / (k * k);
@@ -62,65 +63,75 @@ const RandomWalkSimulation = () => {
 
     for (let i = 1; i <= params.N; i++) {
       totCas += sim(params.opt);
-      values.push(totCas/i);
-      expected.push(a);
+      values.push(totCas);
+      expected.push(a * i);
     }
     
     return { steps, values, expected };
   }, [params.N, params.opt]);
 
-  const updateChart = React.useCallback(() => {
-    if (chartRef.current) {
-      const ctx = chartRef.current.getContext('2d');
-      const { steps, values, expected } = generateTrajectory();
+  // Generate new trajectory only when parameters change
+  React.useEffect(() => {
+    trajectoryRef.current = generateTrajectory();
+    setCurrentStep(0);
+    updateChart(0);
+  }, [params, generateTrajectory]);
 
-      if (chartInstance.current) {
-        chartInstance.current.destroy();
-      }
+  const updateChart = React.useCallback((step) => {
+    if (!chartRef.current || !trajectoryRef.current) return;
 
-      chartInstance.current = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: steps.slice(0, currentStep + 1),
-          datasets: [
-            {
-              label: 'Random Walk',
-              data: values.slice(0, currentStep + 1),
-              borderColor: 'rgb(75, 192, 192)',
-              borderWidth: 2,
-              pointRadius: 0
-            },
-            {
-              label: 'Expected Value',
-              data: expected.slice(0, currentStep + 1),
-              borderColor: 'rgb(255, 99, 132)',
-              borderWidth: 2,
-              pointRadius: 0
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          animation: false,
-          scales: {
-            y: {
-              beginAtZero: false
-            }
+    const ctx = chartRef.current.getContext('2d');
+    const { steps, values, expected } = trajectoryRef.current;
+
+    if (chartInstance.current) {
+      chartInstance.current.destroy();
+    }
+
+    chartInstance.current = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: steps.slice(0, step + 1),
+        datasets: [
+          {
+            label: 'Random Walk',
+            data: values.slice(0, step + 1),
+            borderColor: 'rgb(75, 192, 192)',
+            borderWidth: 2,
+            pointRadius: 0
           },
-          plugins: {
-            legend: {
-              position: 'top'
-            }
+          {
+            label: 'Expected Value',
+            data: expected.slice(0, step + 1),
+            borderColor: 'rgb(255, 99, 132)',
+            borderWidth: 2,
+            pointRadius: 0
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        scales: {
+          y: {
+            beginAtZero: false
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'top'
           }
         }
-      });
-    }
-  }, [generateTrajectory, currentStep]);
+      }
+    });
+  }, []);
 
+  // Update chart when currentStep changes
   React.useEffect(() => {
-    updateChart();
-  }, [updateChart]);
+    if (trajectoryRef.current) {
+      updateChart(currentStep);
+    }
+  }, [currentStep, updateChart]);
 
   React.useEffect(() => {
     let interval;
@@ -144,7 +155,6 @@ const RandomWalkSimulation = () => {
               value={params.opt}
               onChange={(e) => {
                 setParams(prev => ({ ...prev, opt: parseInt(e.target.value) }));
-                setCurrentStep(0);
                 setIsPlaying(false);
               }}
             >
@@ -162,7 +172,6 @@ const RandomWalkSimulation = () => {
               value={params.N}
               onChange={(e) => {
                 setParams(prev => ({ ...prev, N: Math.max(1, parseInt(e.target.value) || 0) }));
-                setCurrentStep(0);
                 setIsPlaying(false);
               }}
             />

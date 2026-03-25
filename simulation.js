@@ -64,7 +64,7 @@ const RandomWalkSimulation = () => {
     for (let i = 1; i <= params.N; i++) {
       totCas += sim(params.opt);
       values.push(totCas);
-      expected.push(a);
+      expected.push(i*a);
     }
     
     return { steps, values, expected };
